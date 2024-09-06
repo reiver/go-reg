@@ -9,6 +9,7 @@ type Registry[T any] struct {
 	mutex sync.Mutex
 }
 
+// For lets you iterate through all the items in the registry — it calls func 'fn' on each item in the registry.
 func (receiver *Registry[T]) For(fn func(string, T)) {
 	if nil == receiver {
 		panic(errNilReceiver)
@@ -22,6 +23,7 @@ func (receiver *Registry[T]) For(fn func(string, T)) {
 	}
 }
 
+// Get return the item inthe registry registered under the name 'name'.
 func (receiver *Registry[T]) Get(name string) (value T, found bool) {
 	if nil == receiver {
 		panic(errNilReceiver)
@@ -30,8 +32,16 @@ func (receiver *Registry[T]) Get(name string) (value T, found bool) {
 	receiver.mutex.Lock()
 	defer receiver.mutex.Unlock()
 
+	return receiver.get(name)
+}
+
+func (receiver *Registry[T]) get(name string) (value T, found bool) {
+	var empty T
+
+	if nil == receiver {
+		return empty, false
+	}
 	if nil == receiver.values {
-		var empty T
 		return empty, false
 	}
 
@@ -39,6 +49,7 @@ func (receiver *Registry[T]) Get(name string) (value T, found bool) {
 	return value, found
 }
 
+// Len returns the number of items in the registry.
 func (receiver *Registry[T]) Len() int {
 	if nil == receiver {
 		panic(errNilReceiver)
@@ -50,6 +61,8 @@ func (receiver *Registry[T]) Len() int {
 	return len(receiver.values)
 }
 
+// Set registers an item in the registry under the name 'name', but
+// it also returns the previous item under the name 'name' if it existed.
 func (receiver *Registry[T]) Set(name string, value T) (previous T, found bool) {
 	if nil == receiver {
 		panic(errNilReceiver)
@@ -62,13 +75,15 @@ func (receiver *Registry[T]) Set(name string, value T) (previous T, found bool) 
 		receiver.values = map[string]T{}
 	}
 
-	previous, found = receiver.values[name]
+	previous, found = receiver.get(name)
 
 	receiver.values[name] = value
 	return previous, found
 }
 
-func (receiver *Registry[T]) Unset(name string) {
+// Unset removed an item in the registry under the name 'name', if it is there, and
+// it also returns the previous item under the name 'name' if it existed.
+func (receiver *Registry[T]) Unset(name string) (previous T, found bool) {
 	if nil == receiver {
 		panic(errNilReceiver)
 	}
@@ -80,5 +95,8 @@ func (receiver *Registry[T]) Unset(name string) {
 		return
 	}
 
+	previous, found = receiver.get(name)
+
 	delete(receiver.values, name)
+	return previous, found
 }
