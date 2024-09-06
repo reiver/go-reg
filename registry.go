@@ -9,6 +9,19 @@ type Registry[T any] struct {
 	mutex sync.Mutex
 }
 
+func (receiver *Registry[T]) For(fn func(string, T)) {
+	if nil == receiver {
+		panic(errNilReceiver)
+	}
+
+	receiver.mutex.Lock()
+	defer receiver.mutex.Unlock()
+
+	for name, value := range receiver.values {
+		fn(name, value)
+	}
+}
+
 func (receiver *Registry[T]) Get(name string) (value T, found bool) {
 	if nil == receiver {
 		panic(errNilReceiver)
