@@ -37,7 +37,7 @@ func (receiver *Registry[T]) Len() int {
 	return len(receiver.values)
 }
 
-func (receiver *Registry[T]) Set(name string, value T) {
+func (receiver *Registry[T]) Set(name string, value T) (previous T, found bool) {
 	if nil == receiver {
 		panic(errNilReceiver)
 	}
@@ -49,7 +49,10 @@ func (receiver *Registry[T]) Set(name string, value T) {
 		receiver.values = map[string]T{}
 	}
 
+	previous, found = receiver.values[name]
+
 	receiver.values[name] = value
+	return previous, found
 }
 
 func (receiver *Registry[T]) Unset(name string) {
