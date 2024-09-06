@@ -26,6 +26,17 @@ func (receiver *Registry[T]) Get(name string) (value T, found bool) {
 	return value, found
 }
 
+func (receiver *Registry[T]) Len() int {
+	if nil == receiver {
+		panic(errNilReceiver)
+	}
+
+	receiver.mutex.Lock()
+	defer receiver.mutex.Unlock()
+
+	return len(receiver.values)
+}
+
 func (receiver *Registry[T]) Set(name string, value T) {
 	if nil == receiver {
 		panic(errNilReceiver)
