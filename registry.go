@@ -10,6 +10,9 @@ type Registry[T any] struct {
 }
 
 // For lets you iterate through all the items in the registry — it calls func 'fn' on each item in the registry.
+//
+// Note that you should NOT call .Get(), .Set(), .Len(), or .Unset() from the `fn`.
+// It will cause For to lock.
 func (receiver *Registry[T]) For(fn func(string, T)) {
 	if nil == receiver {
 		panic(errNilReceiver)
