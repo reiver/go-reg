@@ -94,6 +94,10 @@ func (receiver *Registry[T]) Unset(name string) (previous T, found bool) {
 	receiver.mutex.Lock()
 	defer receiver.mutex.Unlock()
 
+	return receiver.unset(name)
+}
+
+func (receiver *Registry[T]) unset(name string) (previous T, found bool) {
 	if nil == receiver.values {
 		return
 	}
@@ -102,4 +106,25 @@ func (receiver *Registry[T]) Unset(name string) (previous T, found bool) {
 
 	delete(receiver.values, name)
 	return previous, found
+}
+
+func (receiver *Registry[T]) UnsetWhen(name string, whenFunc func(T)bool) (previous T, found bool, when bool) {
+	if nil == receiver {
+		panic(errNilReceiver)
+	}
+
+	receiver.mutex.Lock()
+	defer receiver.mutex.Unlock()
+
+	{
+		previous, found = receiver.get(name)
+		if found && !whenFunc(previous) {
+			return
+		}
+	}
+
+	{
+		previous, found := receiver.unset(name)
+		return previous, found, true
+	}
 }
