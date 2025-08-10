@@ -41,7 +41,7 @@ import "github.com/reiver/go-reg"
 
 To install package **reg** do the following:
 ```
-GOPROXY=direct go get https://github.com/reiver/go-reg
+GOPROXY=direct go get github.com/reiver/go-reg
 ```
 
 ## Author
