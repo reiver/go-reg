@@ -10,6 +10,9 @@ type Registry[T any] struct {
 }
 
 // For lets you iterate through all the items in the registry — it calls func 'fn' on each item in the registry.
+//
+// Note that you should NOT call .Get(), .Set(), .Len(), or .Unset() from the `fn`.
+// It will cause For to lock.
 func (receiver *Registry[T]) For(fn func(string, T)) {
 	if nil == receiver {
 		panic(errNilReceiver)
@@ -91,6 +94,10 @@ func (receiver *Registry[T]) Unset(name string) (previous T, found bool) {
 	receiver.mutex.Lock()
 	defer receiver.mutex.Unlock()
 
+	return receiver.unset(name)
+}
+
+func (receiver *Registry[T]) unset(name string) (previous T, found bool) {
 	if nil == receiver.values {
 		return
 	}
@@ -99,4 +106,25 @@ func (receiver *Registry[T]) Unset(name string) (previous T, found bool) {
 
 	delete(receiver.values, name)
 	return previous, found
+}
+
+func (receiver *Registry[T]) UnsetWhen(name string, whenFunc func(T)bool) (previous T, found bool, when bool) {
+	if nil == receiver {
+		panic(errNilReceiver)
+	}
+
+	receiver.mutex.Lock()
+	defer receiver.mutex.Unlock()
+
+	{
+		previous, found = receiver.get(name)
+		if found && !whenFunc(previous) {
+			return
+		}
+	}
+
+	{
+		previous, found := receiver.unset(name)
+		return previous, found, true
+	}
 }
