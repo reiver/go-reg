@@ -18,9 +18,9 @@ func (receiver RegistererFuncs[T]) Len() int {
 }
 
 func (receiver RegistererFuncs[T]) Set(name string, value T) (previous T, found bool) {
-	return receiver.Set(name, value)
+	return receiver.SetFunc(name, value)
 }
 
 func (receiver RegistererFuncs[T]) Unset(name string) (previous T, found bool) {
-	return receiver.Unset(name)
+	return receiver.UnsetFunc(name)
 }
