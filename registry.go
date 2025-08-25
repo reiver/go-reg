@@ -27,6 +27,9 @@ func (receiver *Registry[T]) For(fn func(string, T)) {
 }
 
 // Get return the item inthe registry registered under the name 'name'.
+//
+// This should NOT be called from within the function passed to [Registry.For].
+// Doing so will cause a deadlock
 func (receiver *Registry[T]) Get(name string) (value T, found bool) {
 	if nil == receiver {
 		panic(errNilReceiver)
@@ -53,6 +56,9 @@ func (receiver *Registry[T]) get(name string) (value T, found bool) {
 }
 
 // Len returns the number of items in the registry.
+//
+// This should NOT be called from within the function passed to [Registry.For].
+// Doing so will cause a deadlock
 func (receiver *Registry[T]) Len() int {
 	if nil == receiver {
 		panic(errNilReceiver)
@@ -66,6 +72,9 @@ func (receiver *Registry[T]) Len() int {
 
 // Set registers an item in the registry under the name 'name', but
 // it also returns the previous item under the name 'name' if it existed.
+//
+// This should NOT be called from within the function passed to [Registry.For].
+// Doing so will cause a deadlock
 func (receiver *Registry[T]) Set(name string, value T) (previous T, found bool) {
 	if nil == receiver {
 		panic(errNilReceiver)
@@ -86,6 +95,9 @@ func (receiver *Registry[T]) Set(name string, value T) (previous T, found bool) 
 
 // Unset removes an item in the registry under the name 'name', if it is there, and
 // it also returns the previous item under the name 'name' if it existed.
+//
+// This should NOT be called from within the function passed to [Registry.For].
+// Doing so will cause a deadlock
 func (receiver *Registry[T]) Unset(name string) (previous T, found bool) {
 	if nil == receiver {
 		panic(errNilReceiver)
@@ -111,6 +123,9 @@ func (receiver *Registry[T]) unset(name string) (previous T, found bool) {
 
 // UnsetWhen removes an item in the registry under the name 'name', if it is there and the `whenFunc` returns true, and
 // it also returns the previous item under the name 'name' if it existed.
+//
+// This should NOT be called from within the function passed to [Registry.For].
+// Doing so will cause a deadlock
 func (receiver *Registry[T]) UnsetWhen(name string, whenFunc func(T)bool) (previous T, found bool, when bool) {
 	if nil == receiver {
 		panic(errNilReceiver)
