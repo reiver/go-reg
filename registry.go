@@ -84,7 +84,7 @@ func (receiver *Registry[T]) Set(name string, value T) (previous T, found bool) 
 	return previous, found
 }
 
-// Unset removed an item in the registry under the name 'name', if it is there, and
+// Unset removes an item in the registry under the name 'name', if it is there, and
 // it also returns the previous item under the name 'name' if it existed.
 func (receiver *Registry[T]) Unset(name string) (previous T, found bool) {
 	if nil == receiver {
@@ -108,6 +108,9 @@ func (receiver *Registry[T]) unset(name string) (previous T, found bool) {
 	return previous, found
 }
 
+
+// UnsetWhen removes an item in the registry under the name 'name', if it is there and the `whenFunc` returns true, and
+// it also returns the previous item under the name 'name' if it existed.
 func (receiver *Registry[T]) UnsetWhen(name string, whenFunc func(T)bool) (previous T, found bool, when bool) {
 	if nil == receiver {
 		panic(errNilReceiver)
