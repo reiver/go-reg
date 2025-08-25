@@ -13,7 +13,7 @@ type Registry[T any] struct {
 //
 // Note that you should NOT call .Get(), .Set(), .Len(), or .Unset() from the `fn`.
 // It will cause For to lock.
-func (receiver *Registry[T]) For(fn func(string, T)) {
+func (receiver *Registry[T]) For(fn func(Registerer[T], string, T)) {
 	if nil == receiver {
 		panic(errNilReceiver)
 	}
@@ -21,8 +21,15 @@ func (receiver *Registry[T]) For(fn func(string, T)) {
 	receiver.mutex.Lock()
 	defer receiver.mutex.Unlock()
 
+	var registerer Registerer[T] = RegistererFuncs[T]{
+		GetFunc: receiver.get,
+		LenFunc: receiver.len,
+		SetFunc: receiver.set,
+		UnsetFunc: receiver.unset,
+	}
+
 	for name, value := range receiver.values {
-		fn(name, value)
+		fn(registerer, name, value)
 	}
 }
 
@@ -67,6 +74,11 @@ func (receiver *Registry[T]) Len() int {
 	receiver.mutex.Lock()
 	defer receiver.mutex.Unlock()
 
+	return receiver.len()
+}
+
+
+func (receiver *Registry[T]) len() int {
 	return len(receiver.values)
 }
 
@@ -83,6 +95,10 @@ func (receiver *Registry[T]) Set(name string, value T) (previous T, found bool) 
 	receiver.mutex.Lock()
 	defer receiver.mutex.Unlock()
 
+	return receiver.set(name, value)
+}
+
+func (receiver *Registry[T]) set(name string, value T) (previous T, found bool) {
 	if nil == receiver.values {
 		receiver.values = map[string]T{}
 	}
